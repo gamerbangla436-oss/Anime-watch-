@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Anime Site</title>
+</head>
+<body>
+<h1>Anime List</h1>
+<div id="list"></div>
+
+<script>
+fetch("http://localhost:3000/anime")
+.then(res => res.json())
+.then(data => {
+  const list = document.getElementById("list");
+  data.forEach(a => {
+    const div = document.createElement("div");
+    div.innerHTML = `<h3>${a.title}</h3><video width='300' controls src='${a.video}'></video>`;
+    list.appendChild(div);
+  });
+});
+</script>
+</body>
+</html>

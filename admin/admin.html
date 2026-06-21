@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Upload</title>
+</head>
+<body>
+<h1>Upload Anime</h1>
+
+<input id="title" placeholder="Title"><br>
+<input id="video" placeholder="Video URL"><br>
+<button onclick="upload()">Upload</button>
+
+<script>
+function upload() {
+  fetch("http://localhost:3000/anime", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: document.getElementById("title").value,
+      video: document.getElementById("video").value
+    })
+  }).then(()=>alert("Uploaded"));
+}
+</script>
+</body>
+</html>
