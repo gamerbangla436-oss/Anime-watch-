@@ -1,23 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Anime Site</title>
+  <title>Anime Site</title>
 </head>
 <body>
-<h1>Anime List</h1>
-<div id="list"></div>
+  <h1>Anime List</h1>
+  <div id="list"></div>
 
-<script>
-fetch("http://localhost:3000/anime")
-.then(res => res.json())
-.then(data => {
-  const list = document.getElementById("list");
-  data.forEach(a => {
-    const div = document.createElement("div");
-    div.innerHTML = `<h3>${a.title}</h3><video width='300' controls src='${a.video}'></video>`;
-    list.appendChild(div);
-  });
-});
-</script>
+  <script>
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, function(m){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+      });
+    }
+
+    function renderList(data) {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+      if (!Array.isArray(data) || data.length === 0) {
+        list.innerHTML = "<p>No anime available.</p>";
+        return;
+      }
+      data.forEach(a => {
+        const div = document.createElement("div");
+        div.innerHTML = `<h3>${escapeHtml(a.title)}</h3><video width='300' controls src='${escapeHtml(a.video)}'></video>`;
+        list.appendChild(div);
+      });
+    }
+
+    // Use relative path so it works both locally and when deployed behind the same origin.
+    fetch("/anime")
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then(renderList)
+      .catch(err => {
+        document.getElementById("list").innerHTML = `<p>Error loading list: ${escapeHtml(err.message)}</p>`;
+        console.error(err);
+      });
+
+    // If server provides Server-Sent Events at /events, update live
+    if (window.EventSource) {
+      try {
+        const es = new EventSource('/events');
+        es.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            renderList(data);
+          } catch (err) {
+            console.error('SSE data parse error', err);
+          }
+        };
+        es.onerror = (err) => console.error('SSE error', err);
+      } catch (err) {
+        // ignore if SSE not available
+      }
+    }
+  </script>
 </body>
 </html>
