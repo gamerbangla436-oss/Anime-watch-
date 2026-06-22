@@ -50,7 +50,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
-// Return series list (new model)
+// Return full series list
 app.get('/anime', (req, res) => {
   res.json(readData());
 });
@@ -63,14 +63,15 @@ app.post('/anime', (req, res) => {
   }
 
   const data = readData();
-  // create a new series containing this as single-episode series
   const id = (body.id || body.title).toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const series = {
     id,
     title: body.title,
     description: body.description || '',
     thumbnail: body.thumbnail || `https://via.placeholder.com/320x180?text=${encodeURIComponent(body.title)}`,
-    episodes: [ { id: 's1', title: body.title, video: body.video || '' } ]
+    episodes: [ { id: 's1', title: body.title, video: body.video || '' } ],
+    status: body.status || null,
+    progress: body.progress || 0
   };
   data.push(series);
   writeData(data);
@@ -92,7 +93,12 @@ app.post('/series', (req, res) => {
     title: body.title,
     description: body.description || '',
     thumbnail: body.thumbnail || `https://via.placeholder.com/320x180?text=${encodeURIComponent(body.title)}`,
-    episodes: Array.isArray(body.episodes) ? body.episodes : []
+    episodes: Array.isArray(body.episodes) ? body.episodes : [],
+    anilistId: body.anilistId || null,
+    malId: body.malId || null,
+    featured: !!body.featured,
+    status: body.status || null,
+    progress: body.progress || 0
   };
 
   data.push(series);
@@ -118,6 +124,42 @@ app.post('/series/:id/episodes', (req, res) => {
   writeData(data);
   notifyAll(data);
   res.json({ success: true, episode });
+});
+
+// Update series fields (partial update)
+app.patch('/series/:id', (req, res) => {
+  const sid = req.params.id;
+  const body = req.body || {};
+  const data = readData();
+  const series = data.find(s => s.id === sid);
+  if (!series) return res.status(404).json({ success: false, error: 'series not found' });
+
+  // update allowed fields
+  const allowed = ['title','description','thumbnail','anilistId','malId','featured','status','progress'];
+  allowed.forEach(k => {
+    if (Object.prototype.hasOwnProperty.call(body, k)) series[k] = body[k];
+  });
+
+  writeData(data);
+  notifyAll(data);
+  res.json({ success: true, series });
+});
+
+// Watchlist endpoints (simple per-session JSON store)
+const WATCHLIST_FILE = path.join(__dirname, 'watchlist.json');
+if (!fs.existsSync(WATCHLIST_FILE)) fs.writeFileSync(WATCHLIST_FILE, '[]', 'utf-8');
+function readWatchlist(){ try{return JSON.parse(fs.readFileSync(WATCHLIST_FILE,'utf-8')||'[]')}catch(e){return[];} }
+function writeWatchlist(w){ fs.writeFileSync(WATCHLIST_FILE, JSON.stringify(w,null,2)); }
+
+app.get('/watchlist', (req,res)=>{ res.json(readWatchlist()); });
+app.post('/watchlist', (req,res)=>{
+  const item = req.body;
+  if(!item || !item.seriesId || !item.episodeId) return res.status(400).json({success:false,error:'missing seriesId or episodeId'});
+  const list = readWatchlist();
+  list.push(item);
+  writeWatchlist(list);
+  notifyAll(readData());
+  res.json({success:true});
 });
 
 // Server-Sent Events endpoint for live updates
