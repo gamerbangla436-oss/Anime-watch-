@@ -1,46 +1,123 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <title>Anime Site</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 24px auto; }
+    #list > div { margin-bottom: 18px; padding: 8px; border: 1px solid #eee; border-radius: 6px; }
+    .empty { color: #666; }
+    #status { margin-bottom: 12px; color: #333; }
+  </style>
 </head>
 <body>
   <h1>Anime List</h1>
+  <div id="status">Loading…</div>
   <div id="list"></div>
 
   <script>
+    const API = "/anime"; // backend endpoint (adjust if backend is hosted elsewhere)
+    const POLL_MS = 10000; // poll every 10 seconds
+
     function escapeHtml(str) {
-      return String(str).replace(/[&<>"']/g, function(m){
+      return String(str || '').replace(/[&<>"']/g, function(m){
         return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
       });
     }
 
     function renderList(data) {
-      const list = document.getElementById("list");
-      list.innerHTML = "";
+      const statusEl = document.getElementById('status');
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+
       if (!Array.isArray(data) || data.length === 0) {
-        list.innerHTML = "<p>No anime available.</p>";
+        statusEl.textContent = '';
+        const div = document.createElement('div');
+        div.className = 'empty';
+        div.textContent = 'No anime available.';
+        list.appendChild(div);
         return;
       }
+
+      statusEl.textContent = '';
+
       data.forEach(a => {
-        const div = document.createElement("div");
-        div.innerHTML = `<h3>${escapeHtml(a.title)}</h3><video width='300' controls src='${escapeHtml(a.video)}'></video>`;
+        const div = document.createElement('div');
+        const title = document.createElement('h3');
+        title.textContent = a.title || 'Untitled';
+
+        let media;
+        if (a.video && (a.video.endsWith('.mp4') || a.video.includes('youtube.com') || a.video.includes('youtu.be'))) {
+          if (a.video.includes('youtube.com') || a.video.includes('youtu.be')) {
+            const iframe = document.createElement('iframe');
+            iframe.width = '560';
+            iframe.height = '315';
+            iframe.allowFullscreen = true;
+            let src = a.video;
+            try {
+              if (a.video.includes('watch?v=')) {
+                const id = new URL(a.video).searchParams.get('v');
+                if (id) src = 'https://www.youtube.com/embed/' + id;
+              } else if (a.video.includes('youtu.be')) {
+                const id = a.video.split('/').pop();
+                if (id) src = 'https://www.youtube.com/embed/' + id;
+              }
+            } catch (e) {
+              // leave src as-is on parse error
+            }
+            iframe.src = src;
+            media = iframe;
+          } else {
+            const video = document.createElement('video');
+            video.width = 560;
+            video.controls = true;
+            video.src = a.video;
+            media = video;
+          }
+        } else if (a.video) {
+          const link = document.createElement('a');
+          link.href = a.video;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Open video';
+          media = link;
+        } else {
+          const p = document.createElement('p');
+          p.textContent = 'No video URL provided.';
+          media = p;
+        }
+
+        div.appendChild(title);
+        div.appendChild(media);
         list.appendChild(div);
       });
     }
 
-    // Use relative path so it works both locally and when deployed behind the same origin.
-    fetch("/anime")
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then(renderList)
-      .catch(err => {
-        document.getElementById("list").innerHTML = `<p>Error loading list: ${escapeHtml(err.message)}</p>`;
-        console.error(err);
-      });
+    async function fetchAnime() {
+      const statusEl = document.getElementById('status');
+      try {
+        statusEl.textContent = 'Checking for new anime...';
+        const res = await fetch(API, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Network response not ok: ' + res.status);
+        const data = await res.json();
+        renderList(data);
+      } catch (err) {
+        console.error('Failed to fetch anime list', err);
+        statusEl.textContent = '';
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        const div = document.createElement('div');
+        div.className = 'empty';
+        div.textContent = 'Unable to load anime list. Check backend server.';
+        list.appendChild(div);
+      }
+    }
 
-    // If server provides Server-Sent Events at /events, update live
+    // initial load and polling for automatic updates
+    fetchAnime();
+    setInterval(fetchAnime, POLL_MS);
+
+    // Optional: listen for Server-Sent Events if backend offers live updates
     if (window.EventSource) {
       try {
         const es = new EventSource('/events');
