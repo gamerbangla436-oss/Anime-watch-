@@ -50,24 +50,74 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
-app.get("/anime", (req, res) => {
+// Return series list (new model)
+app.get('/anime', (req, res) => {
   res.json(readData());
 });
 
-app.post("/anime", (req, res) => {
-  const item = req.body;
-  if (!item || !item.title) {
+// Legacy POST endpoint (keeps backwards compatibility): add a flat item as a new series with one episode
+app.post('/anime', (req, res) => {
+  const body = req.body;
+  if (!body || !body.title) {
     return res.status(400).json({ success: false, error: 'missing title' });
   }
 
   const data = readData();
-  data.push(item);
+  // create a new series containing this as single-episode series
+  const id = (body.id || body.title).toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const series = {
+    id,
+    title: body.title,
+    description: body.description || '',
+    thumbnail: body.thumbnail || `https://via.placeholder.com/320x180?text=${encodeURIComponent(body.title)}`,
+    episodes: [ { id: 's1', title: body.title, video: body.video || '' } ]
+  };
+  data.push(series);
   writeData(data);
-
-  // notify SSE clients with the full updated list
   notifyAll(data);
+  res.json({ success: true, series });
+});
 
-  res.json({ success: true });
+// Create a new series
+app.post('/series', (req, res) => {
+  const body = req.body;
+  if (!body || !body.title) return res.status(400).json({ success: false, error: 'missing title' });
+
+  const data = readData();
+  const id = (body.id || body.title).toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  if (data.find(s => s.id === id)) return res.status(409).json({ success: false, error: 'series id already exists' });
+
+  const series = {
+    id,
+    title: body.title,
+    description: body.description || '',
+    thumbnail: body.thumbnail || `https://via.placeholder.com/320x180?text=${encodeURIComponent(body.title)}`,
+    episodes: Array.isArray(body.episodes) ? body.episodes : []
+  };
+
+  data.push(series);
+  writeData(data);
+  notifyAll(data);
+  res.json({ success: true, series });
+});
+
+// Add episode to existing series
+app.post('/series/:id/episodes', (req, res) => {
+  const sid = req.params.id;
+  const body = req.body;
+  if (!body || !body.title || !body.video) return res.status(400).json({ success: false, error: 'missing title or video' });
+
+  const data = readData();
+  const series = data.find(s => s.id === sid);
+  if (!series) return res.status(404).json({ success: false, error: 'series not found' });
+
+  // create episode id
+  const eid = `e${(series.episodes.length + 1)}`;
+  const episode = { id: eid, title: body.title, video: body.video };
+  series.episodes.push(episode);
+  writeData(data);
+  notifyAll(data);
+  res.json({ success: true, episode });
 });
 
 // Server-Sent Events endpoint for live updates
