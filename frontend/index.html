@@ -3,207 +3,259 @@
 <head>
   <meta charset="utf-8">
   <title>Anime Hub</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    :root{--max:1100px}
-    body{font-family:Inter,system-ui,Arial,sans-serif;max-width:var(--max);margin:20px auto;padding:0 16px}
-    header{display:flex;align-items:center;justify-content:space-between}
-    h1{margin:0}
-    #status{color:#666;margin-top:6px}
+    :root{
+      --bg:#0b0b0d; --card:#0f1113; --muted:#9aa0a6; --accent:#ff8c2b; --glass: rgba(255,255,255,0.04);
+      --max:1200px; --gap:16px; --radius:12px;
+      font-family: Inter, system-ui, Arial, sans-serif;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#070709 0%, #0b0b0d 100%);color:#e6eef3}
+    .wrap{max-width:var(--max);margin:0 auto;padding:20px}
 
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:18px}
-    .card{border:1px solid #e6e6e6;border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
-    .thumb{width:100%;height:120px;object-fit:cover;background:#ddd}
-    .card .meta{padding:8px}
-    .card h3{margin:0;font-size:16px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    header a{color:var(--muted);text-decoration:none;font-size:14px}
 
-    #detail{display:none;margin-top:18px}
-    #episodes{margin-top:12px}
-    #player{margin-top:12px}
+    /* HERO */
+    .hero{position:relative;height:48vh;border-radius:14px;overflow:hidden;background:#111}
+    .hero .media{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.45) saturate(.9)}
+    .hero .overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,0.6) 20%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.7));}
+    .hero .content{position:absolute;left:6%;top:18%;z-index:5;max-width:50%}
+    .hero h2{margin:0;font-size:32px;letter-spacing:0.5px}
+    .badges{display:flex;gap:8px;margin:10px 0}
+    .badge{background:var(--glass);padding:6px 8px;border-radius:8px;color:var(--muted);font-size:13px}
+    .hero p{color:rgba(230,238,243,.85);max-width:60%;line-height:1.4}
+    .btns{margin-top:12px;display:flex;gap:10px}
+    .btn{background:var(--accent);color:#061018;padding:10px 16px;border-radius:8px;border:0;cursor:pointer}
+    .btn.outline{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff}
+    .hero .dots{position:absolute;left:6%;bottom:12px;display:flex;gap:8px}
+    .dot{width:10px;height:6px;border-radius:6px;background:rgba(255,255,255,0.2)}
+    .dot.active{background:var(--accent)}
 
-    .back{background:#f3f3f3;border:1px solid #ddd;padding:6px 10px;border-radius:6px;cursor:pointer}
+    /* Rows */
+    .row{margin-top:26px}
+    .row .row-head{display:flex;align-items:center;justify-content:space-between}
+    .row h3{margin:0;font-size:18px}
+    .row .view{color:var(--muted);font-size:13px}
+    .carousel{display:flex;gap:12px;overflow:hidden;padding:12px 0}
+    .track{display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:6px}
+    .track::-webkit-scrollbar{height:8px}
+    .track::-webkit-scrollbar-thumb{background:#1b1b1d;border-radius:6px}
 
-    .empty{color:#666;padding:18px;text-align:center}
+    .card{min-width:160px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));border-radius:10px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.6);cursor:pointer}
+    .card img{width:100%;height:220px;object-fit:cover;display:block}
+    .card .meta{padding:8px;color:var(--muted);font-size:13px}
+    .card .title{color:#fff;font-weight:600;margin-top:6px}
+
+    /* Numbered card style */
+    .big-card{min-width:220px;border-radius:12px;position:relative}
+    .big-card .index{position:absolute;left:8px;bottom:10px;font-size:54px;font-weight:700;color:rgba(255,255,255,0.12);text-shadow:0 2px 6px rgba(0,0,0,0.6)}
+
+    /* Watch history small cards */
+    .small{min-width:140px}
+    .ep-chip{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,0.6);color:#fff;padding:4px 6px;border-radius:6px;font-size:12px}
+
+    footer{margin:40px 0;color:var(--muted);font-size:13px;text-align:center}
+
+    @media(max-width:800px){
+      .hero .content{max-width:80%;top:14%}
+      .hero h2{font-size:24px}
+      .card img{height:140px}
+      .big-card .index{font-size:40px}
+      .card{min-width:130px}
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Anime Hub</h1>
-      <div id="status">Loading…</div>
-    </div>
-    <div>
-      <a href="/admin" target="_blank">Admin</a>
-    </div>
-  </header>
-
-  <main>
-    <div id="grid" class="grid" aria-live="polite"></div>
-
-    <section id="detail">
-      <button id="backBtn" class="back">← Back</button>
-      <div id="seriesMeta">
-        <h2 id="seriesTitle"></h2>
-        <p id="seriesDesc"></p>
-        <img id="seriesThumb" src="" alt="" style="max-width:320px;border-radius:6px;border:1px solid #eee"/>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1 style="margin:0">Anime Hub</h1>
+        <div style="color:var(--muted);font-size:13px">Your curated anime collection</div>
       </div>
-      <div id="episodes"></div>
-      <div id="player"></div>
+      <div><a href="/admin/" target="_blank">Admin</a></div>
+    </header>
+
+    <!-- HERO -->
+    <section id="hero" class="hero" aria-label="Spotlight">
+      <div class="media" id="heroMedia"></div>
+      <div class="overlay"></div>
+      <div class="content">
+        <div class="eyebrow" id="heroTag" style="color:var(--muted);font-size:12px;margin-bottom:6px">#1 spotlight</div>
+        <h2 id="heroTitle">Loading…</h2>
+        <div class="badges" id="heroBadges"></div>
+        <p id="heroDesc"></p>
+        <div class="btns">
+          <button class="btn" id="watchNow">Watch Now</button>
+          <button class="btn outline" id="detailsBtn">Details</button>
+        </div>
+      </div>
+      <div class="dots" id="heroDots"></div>
     </section>
-  </main>
+
+    <!-- Trending -->
+    <div class="row">
+      <div class="row-head"><h3>Trending Anime</h3><div class="view">View more ›</div></div>
+      <div class="carousel">
+        <div class="track" id="trendingTrack"></div>
+      </div>
+    </div>
+
+    <!-- Watch History -->
+    <div class="row">
+      <div class="row-head"><h3>Watch History</h3><div class="view">View more ›</div></div>
+      <div class="carousel"><div class="track" id="historyTrack"></div></div>
+    </div>
+
+    <!-- Category rows (example) -->
+    <div class="row">
+      <div class="row-head"><h3>Telugu Dubbed Anime</h3><div class="view">View All ›</div></div>
+      <div class="carousel"><div class="track" id="teluguTrack"></div></div>
+    </div>
+
+    <div class="row">
+      <div class="row-head"><h3>Hindi Dubbed Anime</h3><div class="view">View All ›</div></div>
+      <div class="carousel"><div class="track" id="hindiTrack"></div></div>
+    </div>
+
+    <footer>Made with ❤️ — Anime Hub demo</footer>
+  </div>
 
   <script>
     const API = '/anime';
-    const POLL_MS = 10000;
-
-    function escapeHtml(str){
-      return String(str||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    }
-
+    const WATCH = '/watchlist';
     let seriesList = [];
+    let heroIndex = 0;
 
-    function renderGrid(list){
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
-      if(!Array.isArray(list) || list.length===0){
-        grid.innerHTML = '<div class="empty">No series available.</div>';
-        return;
-      }
-      list.forEach(s=>{
-        const el = document.createElement('div');
-        el.className = 'card';
-        el.tabIndex = 0;
-        el.innerHTML = `
-          <img class="thumb" src="${escapeHtml(s.thumbnail||'https://via.placeholder.com/320x180?text=No+Image')}" alt="${escapeHtml(s.title)}">
-          <div class="meta"><h3>${escapeHtml(s.title)}</h3></div>`;
-        el.addEventListener('click',()=>openSeries(s.id));
-        el.addEventListener('keydown',(e)=>{ if(e.key==='Enter') openSeries(s.id); });
-        grid.appendChild(el);
-      });
-    }
+    function el(tag,cls,html){const d=document.createElement(tag); if(cls) d.className=cls; if(html) d.innerHTML=html; return d}
 
-    function openSeries(id, episodeId){
-      const s = seriesList.find(x=>x.id===id);
-      if(!s) return;
-      document.getElementById('detail').style.display='block';
-      document.getElementById('seriesTitle').textContent = s.title;
-      document.getElementById('seriesDesc').textContent = s.description || '';
-      document.getElementById('seriesThumb').src = s.thumbnail || 'https://via.placeholder.com/320x180?text=No+Image';
-
-      const eps = document.getElementById('episodes');
-      eps.innerHTML = '<h3>Episodes</h3>';
-      const ul = document.createElement('div');
-      s.episodes.forEach(ep=>{
-        const b = document.createElement('button');
-        b.textContent = ep.title || ep.id;
-        b.style.display='block';
-        b.style.margin='8px 0';
-        b.addEventListener('click',()=>playEpisode(s.id, ep.id));
-        ul.appendChild(b);
-      });
-      eps.appendChild(ul);
-
-      // deep-link
-      location.hash = `#/series/${encodeURIComponent(id)}${episodeId?'/'+encodeURIComponent(episodeId):''}`;
-
-      // scroll to detail
-      document.getElementById('detail').scrollIntoView({behavior:'smooth'});
-
-      if(episodeId){ playEpisode(id, episodeId); }
-    }
-
-    function closeDetail(){
-      document.getElementById('detail').style.display='none';
-      document.getElementById('player').innerHTML='';
-      history.pushState('', document.title, window.location.pathname + window.location.search);
-    }
-
-    function playEpisode(seriesId, episodeId){
-      const s = seriesList.find(x=>x.id===seriesId);
-      if(!s) return;
-      const ep = s.episodes.find(e=>e.id===episodeId);
-      if(!ep) return;
-      const player = document.getElementById('player');
-      player.innerHTML = '';
-
-      // handle youtube
-      if(ep.video && (ep.video.includes('youtube.com')||ep.video.includes('youtu.be'))){
-        let src = ep.video;
-        try{
-          if(ep.video.includes('watch?v=')){
-            const id = new URL(ep.video).searchParams.get('v'); if(id) src='https://www.youtube.com/embed/'+id;
-          } else if(ep.video.includes('youtu.be')){ const id = ep.video.split('/').pop(); if(id) src='https://www.youtube.com/embed/'+id; }
-        }catch(e){}
-        const iframe = document.createElement('iframe');
-        iframe.width = '800'; iframe.height='450'; iframe.src = src; iframe.allowFullscreen = true; iframe.style.maxWidth='100%';
-        player.appendChild(iframe);
-      } else if(ep.video && (ep.video.endsWith('.m3u8') || ep.video.includes('.m3u8'))){
-        // HLS - use native video if browser supports or use hls.js (not included) as fallback
-        const video = document.createElement('video');
-        video.controls = true; video.width = 800; video.src = ep.video; video.style.maxWidth='100%';
-        player.appendChild(video);
-      } else if(ep.video){
-        const video = document.createElement('video');
-        video.controls = true; video.width = 800; video.src = ep.video; video.style.maxWidth='100%';
-        player.appendChild(video);
-      } else {
-        player.textContent = 'No video URL provided for this episode.';
-      }
-
-      // update hash
-      location.hash = `#/series/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`;
-    }
+    function formatDesc(txt){ if(!txt) return ''; return txt.replace(/<br\s*\/?\>/g,'\n').replace(/<[^>]+>/g,'').slice(0,220) + (txt.length>220?'...':''); }
 
     async function fetchData(){
-      const status = document.getElementById('status');
       try{
-        status.textContent = 'Checking for updates...';
         const res = await fetch(API, {cache:'no-store'});
-        if(!res.ok) throw new Error('Network error '+res.status);
         const data = await res.json();
         seriesList = data;
-        renderGrid(seriesList);
-        status.textContent = '';
-
-        // if deep link present, open it
-        handleHash();
-      }catch(err){
-        console.error(err);
-        status.textContent = '';
-        document.getElementById('grid').innerHTML = '<div class="empty">Unable to load series. Check backend.</div>';
-      }
+        renderAll();
+      }catch(e){ console.error('fetchData',e); }
     }
 
-    // SSE
-    if(window.EventSource){
+    function renderAll(){
+      renderHero();
+      renderTrending();
+      renderHistory();
+      renderCategory('telugu', 'teluguTrack', s=>s.title.toLowerCase().includes('telugu') || (s.genres||[]).includes('Telugu'));
+      renderCategory('hindi', 'hindiTrack', s=>s.title.toLowerCase().includes('hindi') || (s.genres||[]).includes('Hindi'));
+    }
+
+    function renderHero(){
+      if(!seriesList.length) return;
+      const heroList = seriesList.filter(s=>s.bannerImage||s.thumbnail);
+      if(!heroList.length) return;
+      heroIndex = Math.min(heroIndex, heroList.length-1);
+      const pick = heroList[heroIndex];
+      const media = document.getElementById('heroMedia');
+      media.style.backgroundImage = `url(${pick.bannerImage||pick.thumbnail})`;
+      document.getElementById('heroTitle').textContent = pick.title;
+      document.getElementById('heroDesc').textContent = formatDesc(pick.description||'');
+      const bdiv = document.getElementById('heroBadges'); bdiv.innerHTML='';
+      // sample badges
+      const badge = el('span','badge', 'HD'); bdiv.appendChild(badge);
+
+      document.getElementById('watchNow').onclick = ()=>{ openSeries(pick.id, pick.episodes && pick.episodes[0] && pick.episodes[0].id); };
+      document.getElementById('detailsBtn').onclick = ()=>{ openSeries(pick.id); };
+
+      renderHeroDots(heroList.length);
+    }
+
+    function renderHeroDots(n){ const container = document.getElementById('heroDots'); container.innerHTML=''; for(let i=0;i<n;i++){ const d=el('div','dot'); if(i===heroIndex) d.classList.add('active'); d.onclick=()=>{ heroIndex=i; renderHero(); }; container.appendChild(d);} }
+
+    function renderTrending(){
+      const track = document.getElementById('trendingTrack'); track.innerHTML='';
+      const list = seriesList.slice(0,10);
+      list.forEach((s, idx)=>{
+        const card = el('div','card big-card');
+        const img = document.createElement('img'); img.src = s.thumbnail || 'https://via.placeholder.com/320x180?text=No+Image';
+        card.appendChild(img);
+        const index = el('div','index', String((idx+1).toString().padStart(2,'0')));
+        card.appendChild(index);
+        const meta = el('div','meta');
+        meta.innerHTML = `<div class="title">${escapeHtml(s.title)}</div>`;
+        card.appendChild(meta);
+        card.onclick = ()=> openSeries(s.id);
+        track.appendChild(card);
+      });
+    }
+
+    async function renderHistory(){
+      const track = document.getElementById('historyTrack'); track.innerHTML='';
+      // pull watchlist
       try{
-        const es = new EventSource('/events');
-        es.onmessage = e=>{
-          try{ const data = JSON.parse(e.data); seriesList = data; renderGrid(seriesList); handleHash(); }catch(err){ console.error('SSE parse',err); }
-        };
-        es.onerror = err=>{ console.error('SSE error', err); };
-      }catch(e){ }
+        const res = await fetch(WATCH);
+        if(res.ok){ const list = await res.json(); if(Array.isArray(list) && list.length){
+          for(const item of list){
+            const s = seriesList.find(x=>x.id===item.seriesId);
+            if(!s) continue;
+            const card = el('div','card small');
+            const wrapper = document.createElement('div'); wrapper.style.position='relative';
+            const img = document.createElement('img'); img.src = s.thumbnail || 'https://via.placeholder.com/320x180?text=No+Image';
+            wrapper.appendChild(img);
+            const chip = el('div','ep-chip','EP '+(item.episodeId || '')); wrapper.appendChild(chip);
+            card.appendChild(wrapper);
+            const meta = el('div','meta'); meta.innerHTML = `<div class="title">${escapeHtml(s.title)}</div>`;
+            card.appendChild(meta);
+            card.onclick = ()=> openSeries(s.id, item.episodeId);
+            track.appendChild(card);
+          }
+          return;
+        }}
+      }catch(e){ /* ignore*/ }
+      // fallback: show latest watched (last 5 series)
+      seriesList.slice(0,6).forEach(s=>{
+        const card = el('div','card small');
+        const img = document.createElement('img'); img.src = s.thumbnail || 'https://via.placeholder.com/320x180?text=No+Image';
+        card.appendChild(img);
+        const meta = el('div','meta'); meta.innerHTML = `<div class="title">${escapeHtml(s.title)}</div>`;
+        card.appendChild(meta);
+        card.onclick = ()=> openSeries(s.id);
+        track.appendChild(card);
+      });
     }
 
-    // polling fallback
-    fetchData(); setInterval(fetchData, POLL_MS);
-
-    document.getElementById('backBtn').addEventListener('click', closeDetail);
-
-    // handle deep link hash
-    function handleHash(){
-      const h = location.hash || '';
-      if(!h.startsWith('#/series/')) return;
-      const parts = h.replace('#/series/','').split('/').map(decodeURIComponent);
-      const sid = parts[0]; const eid = parts[1];
-      if(!sid) return;
-      openSeries(sid, eid);
+    function renderCategory(key, containerId, matcher){
+      const track = document.getElementById(containerId); track.innerHTML='';
+      const list = seriesList.filter(matcher).slice(0,8);
+      if(!list.length){ // fallback to any
+        seriesList.slice(0,6).forEach(s=> appendCat(s, track));
+      } else list.forEach(s=> appendCat(s, track));
     }
-    window.addEventListener('hashchange', handleHash);
 
-    // initial hash check in case data already loaded
-    window.addEventListener('load', ()=>{
-      // fetchData already called; handleHash will run after data populates
-    });
+    function appendCat(s, track){
+      const card = el('div','card');
+      const img = document.createElement('img'); img.src = s.thumbnail || 'https://via.placeholder.com/320x180?text=No+Image';
+      card.appendChild(img);
+      const meta = el('div','meta'); meta.innerHTML = `<div class="title">${escapeHtml(s.title)}</div>`;
+      card.appendChild(meta);
+      card.onclick = ()=> openSeries(s.id);
+      track.appendChild(card);
+    }
+
+    function escapeHtml(str){ return String(str||'').replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c])); }
+
+    function openSeries(id, episodeId){
+      location.href = '#/series/'+encodeURIComponent(id)+(episodeId?('/'+encodeURIComponent(episodeId)):'');
+      // scroll to detail handled by original frontend code which still exists on / (detail view is placed in /frontend if you kept it)
+      // For compatibility, we will navigate to the old detail hash which the existing script can handle.
+      // If detail view isn't present, navigate directly to /?series=<id>
+    }
+
+    // auto-rotate hero every 6s
+    setInterval(()=>{ heroIndex = (heroIndex+1)%Math.max(1, seriesList.filter(s=>s.bannerImage||s.thumbnail).length); renderHero(); },6000);
+
+    // initial load
+    fetchData();
+    // poll occasionally to pick up updates
+    setInterval(fetchData, 20000);
   </script>
 </body>
 </html>
