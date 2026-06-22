@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Watch - Anime Hub</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{--bg:#0b0b0d;--card:#0f1113;--muted:#9aa0a6;--accent:#ff8c2b;--glass:rgba(255,255,255,0.04);--radius:10px}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#070709 0%, #0b0b0d 100%);color:#e6eef3;font-family:Inter,system-ui,Arial,sans-serif}
+    .wrap{max-width:1100px;margin:20px auto;padding:0 16px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    a.icon{color:var(--muted);text-decoration:none}
+
+    .player-wrap{background:transparent;border-radius:8px;overflow:hidden}
+    .video{width:100%;background:#000;height:auto;max-height:62vh;display:block}
+
+    .controls-row{display:flex;gap:12px;margin-top:12px;align-items:flex-start}
+    .now-panel{width:260px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));padding:14px;border-radius:8px}
+    .now-panel h4{margin:0 0 8px 0}
+    .now-ep{background:var(--accent);color:#061018;padding:8px;border-radius:6px;font-weight:600}
+
+    .right-panel{flex:1}
+    .controls{display:flex;gap:8px;align-items:center}
+    .toggle{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);padding:6px 8px;border-radius:6px;color:var(--muted);cursor:pointer}
+
+    .sources{margin-top:10px;background:rgba(255,255,255,0.02);padding:10px;border-radius:8px}
+
+    .episode-list{margin-top:18px}
+    .ep-card{display:flex;gap:12px;padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.08));margin-bottom:10px;align-items:center}
+    .ep-card.active{border:1px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    .ep-thumb{width:120px;height:68px;object-fit:cover;border-radius:6px}
+    .ep-meta{flex:1}
+    .ep-title{font-weight:700}
+    .ep-desc{color:var(--muted);font-size:13px}
+
+    .lang-select{background:#0f1113;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
+
+    @media(max-width:900px){
+      .controls-row{flex-direction:column}
+      .now-panel{width:100%}
+      .ep-thumb{width:90px;height:56px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div style="display:flex;align-items:center;gap:12px"><a href="/" class="icon">🏠</a><h2 style="margin:0">Watch</h2></div>
+      <div><a href="/admin/" target="_blank" class="icon">Admin</a></div>
+    </header>
+
+    <main>
+      <div id="playerRoot">
+        <div class="player-wrap">
+          <video id="videoPlayer" class="video" controls crossorigin playsinline>
+            <source id="videoSource" src="" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <div class="controls-row">
+          <aside class="now-panel">
+            <div style="font-size:12px;color:var(--muted)">Now playing</div>
+            <h4 id="nowTitle">—</h4>
+            <div class="now-ep" id="nowEp">Episode</div>
+            <div style="margin-top:10px">Select episode language</div>
+            <select id="langSelect" class="lang-select" aria-label="Select episode language"></select>
+            <div class="sources" id="sourcesBox">
+              <div style="font-size:13px;color:var(--muted)">SOURCES</div>
+              <div id="sourcesList" style="margin-top:8px"></div>
+            </div>
+          </aside>
+
+          <section class="right-panel">
+            <div class="controls">
+              <button id="btnPrev" class="toggle">◀ Prev</button>
+              <button id="btnNext" class="toggle">Next ▶</button>
+              <button id="btnAutoplay" class="toggle">Auto Play</button>
+              <button id="btnAutoSkip" class="toggle">Auto Skip</button>
+            </div>
+
+            <div class="episode-list" id="episodeList">
+              <!-- episode cards -->
+            </div>
+          </section>
+        </div>
+
+        <div id="comments" style="margin-top:24px">
+          <h3>Comments</h3>
+          <p style="color:var(--muted)">Comments are not enabled in this demo.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // parse query params
+    function qp(){ const p={}; location.search.replace(/^\?/,'').split('&').forEach(s=>{ if(!s) return; const [k,v]=s.split('='); p[decodeURIComponent(k)]=decodeURIComponent(v||''); }); return p }
+    const API = '/anime'; const WATCH = '/watchlist';
+    let seriesList = [];
+    let currentSeries = null;
+    let currentEpisode = null;
+
+    function escapeHtml(str){ return String(str||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;','\'':'&#39;'}[c]||c)); }
+
+    async function init(){
+      try{
+        const res = await fetch(API, {cache:'no-store'});
+        seriesList = await res.json();
+      }catch(e){ console.error('unable to fetch series',e); seriesList=[] }
+
+      const params = qp();
+      const sid = params.series || params.s || null;
+      const eid = params.ep || params.e || null;
+      const lang = params.lang || null;
+
+      if(!sid){ document.getElementById('nowTitle').textContent = 'No series specified'; return; }
+      currentSeries = seriesList.find(s=>s.id===sid);
+      if(!currentSeries){ document.getElementById('nowTitle').textContent = 'Series not found'; return; }
+
+      // choose episode
+      if(eid){ currentEpisode = currentSeries.episodes.find(x=>x.id===eid); }
+      if(!currentEpisode){ currentEpisode = currentSeries.episodes[0]; }
+
+      renderNow(); renderLangs(); renderEpisodes(lang); loadEpisode(currentEpisode);
+    }
+
+    function renderNow(){
+      document.getElementById('nowTitle').textContent = currentSeries.title;
+      document.getElementById('nowEp').textContent = currentEpisode ? (currentEpisode.title||currentEpisode.id) : '—';
+    }
+
+    function getLanguages(){
+      const langs = new Set();
+      if(Array.isArray(currentSeries.languages)) currentSeries.languages.forEach(l=>l&&langs.add(l));
+      // also collect per-episode languages
+      (currentSeries.episodes||[]).forEach(ep=>{ if(ep.language) langs.add(ep.language); });
+      return Array.from(langs);
+    }
+
+    function renderLangs(){
+      const sel = document.getElementById('langSelect'); sel.innerHTML='';
+      const langs = getLanguages();
+      const optAll = document.createElement('option'); optAll.value='all'; optAll.textContent = 'All Languages'; sel.appendChild(optAll);
+      langs.forEach(l=>{ const o=document.createElement('option'); o.value=l; o.textContent=l; sel.appendChild(o); });
+      sel.addEventListener('change', ()=> renderEpisodes(sel.value));
+    }
+
+    function renderSources(){
+      const box = document.getElementById('sourcesList'); box.innerHTML='';
+      if(!currentEpisode || !currentEpisode.video) { box.textContent = 'No source'; return; }
+      const btn = document.createElement('button'); btn.className='toggle'; btn.textContent = 'Multi'; btn.onclick = ()=>{ alert('Switch source (demo)') };
+      box.appendChild(btn);
+    }
+
+    function renderEpisodes(filterLang){
+      const container = document.getElementById('episodeList'); container.innerHTML='';
+      const eps = (currentSeries.episodes||[]).filter(ep=>{ if(!filterLang || filterLang==='all') return true; return (ep.language && ep.language.toLowerCase()===filterLang.toLowerCase()); });
+      eps.forEach(ep=>{
+        const card = document.createElement('div'); card.className='ep-card';
+        if(currentEpisode && currentEpisode.id===ep.id) card.classList.add('active');
+        const img = document.createElement('img'); img.className='ep-thumb'; img.src = currentSeries.thumbnail || '/assets/posters/placeholder.jpg';
+        const meta = document.createElement('div'); meta.className='ep-meta';
+        meta.innerHTML = `<div class="ep-title">${escapeHtml(ep.title||ep.id)} <span style="font-weight:600;color:var(--muted);font-size:12px">EP ${ep.id.replace(/[^0-9]/g,'')}</span></div><div class="ep-desc">${escapeHtml(currentSeries.description||'')}</div>`;
+        card.appendChild(img); card.appendChild(meta);
+        card.onclick = ()=> { currentEpisode = ep; renderNow(); loadEpisode(ep); renderEpisodes(document.getElementById('langSelect').value); }
+        container.appendChild(card);
+      });
+      renderSources();
+    }
+
+    function loadEpisode(ep){
+      const player = document.getElementById('videoPlayer');
+      const source = document.getElementById('videoSource');
+      // handle youtube links
+      if(ep.video && (ep.video.includes('youtube.com')||ep.video.includes('youtu.be'))){
+        // replace video tag with iframe
+        const wrap = document.getElementById('playerRoot');
+        // temporarily replace player area
+        const html = `<iframe src="${toEmbed(ep.video)}" style="width:100%;height:62vh;border:0" allowfullscreen></iframe>`;
+        document.querySelector('.player-wrap').innerHTML = html;
+      } else {
+        // ensure video element exists
+        const wrap = document.querySelector('.player-wrap');
+        wrap.innerHTML = `<video id="videoPlayer" class="video" controls crossorigin playsinline><source id="videoSource" src="${escapeHtml(ep.video||'')}" type="video/mp4">Your browser does not support the video tag.</video>`;
+        const vp = document.getElementById('videoPlayer');
+        vp.addEventListener('ended', onEnded);
+        // update watchlist
+        postWatch(currentSeries.id, ep.id, 0);
+      }
+      // update hash and history
+      history.replaceState(null, '', `/watch?series=${encodeURIComponent(currentSeries.id)}&ep=${encodeURIComponent(ep.id)}`);
+      renderNow();
+    }
+
+    function toEmbed(url){ try{ if(url.includes('watch?v=')){ const id=new URL(url).searchParams.get('v'); return 'https://www.youtube.com/embed/'+id;} if(url.includes('youtu.be')){ const id=url.split('/').pop(); return 'https://www.youtube.com/embed/'+id;} return url; }catch(e){return url;} }
+
+    function onEnded(){ const auto = document.getElementById('btnAutoplay'); if(auto.classList.contains('enabled')){ // play next
+      const eps = currentSeries.episodes||[]; const idx = eps.findIndex(x=>x.id===currentEpisode.id); if(idx>=0 && idx<eps.length-1){ currentEpisode = eps[idx+1]; loadEpisode(currentEpisode); renderEpisodes(document.getElementById('langSelect').value); }
+    } }
+
+    document.getElementById('btnPrev').addEventListener('click', ()=>{ const eps = currentSeries.episodes||[]; const idx = eps.findIndex(x=>x.id===currentEpisode.id); if(idx>0){ currentEpisode = eps[idx-1]; loadEpisode(currentEpisode); renderEpisodes(document.getElementById('langSelect').value); } });
+    document.getElementById('btnNext').addEventListener('click', ()=>{ const eps = currentSeries.episodes||[]; const idx = eps.findIndex(x=>x.id===currentEpisode.id); if(idx<eps.length-1){ currentEpisode = eps[idx+1]; loadEpisode(currentEpisode); renderEpisodes(document.getElementById('langSelect').value); } });
+    document.getElementById('btnAutoplay').addEventListener('click', (e)=>{ e.target.classList.toggle('enabled'); e.target.style.background = e.target.classList.contains('enabled')? 'var(--accent)':'transparent'; });
+
+    async function postWatch(seriesId, episodeId, progress){ try{ await fetch(WATCH, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({seriesId, episodeId, progress})}); }catch(e){} }
+
+    init();
+  </script>
+</body>
+</html>
