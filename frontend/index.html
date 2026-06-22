@@ -2,138 +2,208 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Anime Site</title>
+  <title>Anime Hub</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 900px; margin: 24px auto; }
-    #list > div { margin-bottom: 18px; padding: 8px; border: 1px solid #eee; border-radius: 6px; }
-    .empty { color: #666; }
-    #status { margin-bottom: 12px; color: #333; }
+    :root{--max:1100px}
+    body{font-family:Inter,system-ui,Arial,sans-serif;max-width:var(--max);margin:20px auto;padding:0 16px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    h1{margin:0}
+    #status{color:#666;margin-top:6px}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:18px}
+    .card{border:1px solid #e6e6e6;border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
+    .thumb{width:100%;height:120px;object-fit:cover;background:#ddd}
+    .card .meta{padding:8px}
+    .card h3{margin:0;font-size:16px}
+
+    #detail{display:none;margin-top:18px}
+    #episodes{margin-top:12px}
+    #player{margin-top:12px}
+
+    .back{background:#f3f3f3;border:1px solid #ddd;padding:6px 10px;border-radius:6px;cursor:pointer}
+
+    .empty{color:#666;padding:18px;text-align:center}
   </style>
 </head>
 <body>
-  <h1>Anime List</h1>
-  <div id="status">Loading…</div>
-  <div id="list"></div>
+  <header>
+    <div>
+      <h1>Anime Hub</h1>
+      <div id="status">Loading…</div>
+    </div>
+    <div>
+      <a href="/admin" target="_blank">Admin</a>
+    </div>
+  </header>
+
+  <main>
+    <div id="grid" class="grid" aria-live="polite"></div>
+
+    <section id="detail">
+      <button id="backBtn" class="back">← Back</button>
+      <div id="seriesMeta">
+        <h2 id="seriesTitle"></h2>
+        <p id="seriesDesc"></p>
+        <img id="seriesThumb" src="" alt="" style="max-width:320px;border-radius:6px;border:1px solid #eee"/>
+      </div>
+      <div id="episodes"></div>
+      <div id="player"></div>
+    </section>
+  </main>
 
   <script>
-    const API = "/anime"; // backend endpoint (adjust if backend is hosted elsewhere)
-    const POLL_MS = 10000; // poll every 10 seconds
+    const API = '/anime';
+    const POLL_MS = 10000;
 
-    function escapeHtml(str) {
-      return String(str || '').replace(/[&<>"']/g, function(m){
-        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
-      });
+    function escapeHtml(str){
+      return String(str||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
-    function renderList(data) {
-      const statusEl = document.getElementById('status');
-      const list = document.getElementById('list');
-      list.innerHTML = '';
+    let seriesList = [];
 
-      if (!Array.isArray(data) || data.length === 0) {
-        statusEl.textContent = '';
-        const div = document.createElement('div');
-        div.className = 'empty';
-        div.textContent = 'No anime available.';
-        list.appendChild(div);
+    function renderGrid(list){
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      if(!Array.isArray(list) || list.length===0){
+        grid.innerHTML = '<div class="empty">No series available.</div>';
         return;
       }
-
-      statusEl.textContent = '';
-
-      data.forEach(a => {
-        const div = document.createElement('div');
-        const title = document.createElement('h3');
-        title.textContent = a.title || 'Untitled';
-
-        let media;
-        if (a.video && (a.video.endsWith('.mp4') || a.video.includes('youtube.com') || a.video.includes('youtu.be'))) {
-          if (a.video.includes('youtube.com') || a.video.includes('youtu.be')) {
-            const iframe = document.createElement('iframe');
-            iframe.width = '560';
-            iframe.height = '315';
-            iframe.allowFullscreen = true;
-            let src = a.video;
-            try {
-              if (a.video.includes('watch?v=')) {
-                const id = new URL(a.video).searchParams.get('v');
-                if (id) src = 'https://www.youtube.com/embed/' + id;
-              } else if (a.video.includes('youtu.be')) {
-                const id = a.video.split('/').pop();
-                if (id) src = 'https://www.youtube.com/embed/' + id;
-              }
-            } catch (e) {
-              // leave src as-is on parse error
-            }
-            iframe.src = src;
-            media = iframe;
-          } else {
-            const video = document.createElement('video');
-            video.width = 560;
-            video.controls = true;
-            video.src = a.video;
-            media = video;
-          }
-        } else if (a.video) {
-          const link = document.createElement('a');
-          link.href = a.video;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.textContent = 'Open video';
-          media = link;
-        } else {
-          const p = document.createElement('p');
-          p.textContent = 'No video URL provided.';
-          media = p;
-        }
-
-        div.appendChild(title);
-        div.appendChild(media);
-        list.appendChild(div);
+      list.forEach(s=>{
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.tabIndex = 0;
+        el.innerHTML = `
+          <img class="thumb" src="${escapeHtml(s.thumbnail||'https://via.placeholder.com/320x180?text=No+Image')}" alt="${escapeHtml(s.title)}">
+          <div class="meta"><h3>${escapeHtml(s.title)}</h3></div>`;
+        el.addEventListener('click',()=>openSeries(s.id));
+        el.addEventListener('keydown',(e)=>{ if(e.key==='Enter') openSeries(s.id); });
+        grid.appendChild(el);
       });
     }
 
-    async function fetchAnime() {
-      const statusEl = document.getElementById('status');
-      try {
-        statusEl.textContent = 'Checking for new anime...';
-        const res = await fetch(API, { cache: 'no-store' });
-        if (!res.ok) throw new Error('Network response not ok: ' + res.status);
+    function openSeries(id, episodeId){
+      const s = seriesList.find(x=>x.id===id);
+      if(!s) return;
+      document.getElementById('detail').style.display='block';
+      document.getElementById('seriesTitle').textContent = s.title;
+      document.getElementById('seriesDesc').textContent = s.description || '';
+      document.getElementById('seriesThumb').src = s.thumbnail || 'https://via.placeholder.com/320x180?text=No+Image';
+
+      const eps = document.getElementById('episodes');
+      eps.innerHTML = '<h3>Episodes</h3>';
+      const ul = document.createElement('div');
+      s.episodes.forEach(ep=>{
+        const b = document.createElement('button');
+        b.textContent = ep.title || ep.id;
+        b.style.display='block';
+        b.style.margin='8px 0';
+        b.addEventListener('click',()=>playEpisode(s.id, ep.id));
+        ul.appendChild(b);
+      });
+      eps.appendChild(ul);
+
+      // deep-link
+      location.hash = `#/series/${encodeURIComponent(id)}${episodeId?'/'+encodeURIComponent(episodeId):''}`;
+
+      // scroll to detail
+      document.getElementById('detail').scrollIntoView({behavior:'smooth'});
+
+      if(episodeId){ playEpisode(id, episodeId); }
+    }
+
+    function closeDetail(){
+      document.getElementById('detail').style.display='none';
+      document.getElementById('player').innerHTML='';
+      history.pushState('', document.title, window.location.pathname + window.location.search);
+    }
+
+    function playEpisode(seriesId, episodeId){
+      const s = seriesList.find(x=>x.id===seriesId);
+      if(!s) return;
+      const ep = s.episodes.find(e=>e.id===episodeId);
+      if(!ep) return;
+      const player = document.getElementById('player');
+      player.innerHTML = '';
+
+      // handle youtube
+      if(ep.video && (ep.video.includes('youtube.com')||ep.video.includes('youtu.be'))){
+        let src = ep.video;
+        try{
+          if(ep.video.includes('watch?v=')){
+            const id = new URL(ep.video).searchParams.get('v'); if(id) src='https://www.youtube.com/embed/'+id;
+          } else if(ep.video.includes('youtu.be')){ const id = ep.video.split('/').pop(); if(id) src='https://www.youtube.com/embed/'+id; }
+        }catch(e){}
+        const iframe = document.createElement('iframe');
+        iframe.width = '800'; iframe.height='450'; iframe.src = src; iframe.allowFullscreen = true; iframe.style.maxWidth='100%';
+        player.appendChild(iframe);
+      } else if(ep.video && (ep.video.endsWith('.m3u8') || ep.video.includes('.m3u8'))){
+        // HLS - use native video if browser supports or use hls.js (not included) as fallback
+        const video = document.createElement('video');
+        video.controls = true; video.width = 800; video.src = ep.video; video.style.maxWidth='100%';
+        player.appendChild(video);
+      } else if(ep.video){
+        const video = document.createElement('video');
+        video.controls = true; video.width = 800; video.src = ep.video; video.style.maxWidth='100%';
+        player.appendChild(video);
+      } else {
+        player.textContent = 'No video URL provided for this episode.';
+      }
+
+      // update hash
+      location.hash = `#/series/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`;
+    }
+
+    async function fetchData(){
+      const status = document.getElementById('status');
+      try{
+        status.textContent = 'Checking for updates...';
+        const res = await fetch(API, {cache:'no-store'});
+        if(!res.ok) throw new Error('Network error '+res.status);
         const data = await res.json();
-        renderList(data);
-      } catch (err) {
-        console.error('Failed to fetch anime list', err);
-        statusEl.textContent = '';
-        const list = document.getElementById('list');
-        list.innerHTML = '';
-        const div = document.createElement('div');
-        div.className = 'empty';
-        div.textContent = 'Unable to load anime list. Check backend server.';
-        list.appendChild(div);
+        seriesList = data;
+        renderGrid(seriesList);
+        status.textContent = '';
+
+        // if deep link present, open it
+        handleHash();
+      }catch(err){
+        console.error(err);
+        status.textContent = '';
+        document.getElementById('grid').innerHTML = '<div class="empty">Unable to load series. Check backend.</div>';
       }
     }
 
-    // initial load and polling for automatic updates
-    fetchAnime();
-    setInterval(fetchAnime, POLL_MS);
-
-    // Optional: listen for Server-Sent Events if backend offers live updates
-    if (window.EventSource) {
-      try {
+    // SSE
+    if(window.EventSource){
+      try{
         const es = new EventSource('/events');
-        es.onmessage = (e) => {
-          try {
-            const data = JSON.parse(e.data);
-            renderList(data);
-          } catch (err) {
-            console.error('SSE data parse error', err);
-          }
+        es.onmessage = e=>{
+          try{ const data = JSON.parse(e.data); seriesList = data; renderGrid(seriesList); handleHash(); }catch(err){ console.error('SSE parse',err); }
         };
-        es.onerror = (err) => console.error('SSE error', err);
-      } catch (err) {
-        // ignore if SSE not available
-      }
+        es.onerror = err=>{ console.error('SSE error', err); };
+      }catch(e){ }
     }
+
+    // polling fallback
+    fetchData(); setInterval(fetchData, POLL_MS);
+
+    document.getElementById('backBtn').addEventListener('click', closeDetail);
+
+    // handle deep link hash
+    function handleHash(){
+      const h = location.hash || '';
+      if(!h.startsWith('#/series/')) return;
+      const parts = h.replace('#/series/','').split('/').map(decodeURIComponent);
+      const sid = parts[0]; const eid = parts[1];
+      if(!sid) return;
+      openSeries(sid, eid);
+    }
+    window.addEventListener('hashchange', handleHash);
+
+    // initial hash check in case data already loaded
+    window.addEventListener('load', ()=>{
+      // fetchData already called; handleHash will run after data populates
+    });
   </script>
 </body>
 </html>
