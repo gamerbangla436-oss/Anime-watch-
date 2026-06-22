@@ -43,7 +43,13 @@ function notifyAll(data) {
 
 // Serve frontend and admin static files
 app.use(express.static(path.join(__dirname, "..", "frontend")));
-app.use('/admin', express.static(path.join(__dirname, "..", "admin")));
+// Serve admin and treat admin.html as the directory index so /admin/ works
+app.use('/admin', express.static(path.join(__dirname, "..", "admin"), { index: 'admin.html' }));
+
+// Fallback route for /admin in case some hosts don't serve index option correctly
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'admin', 'admin.html'));
+});
 
 // Serve index.html at root
 app.get('/', (req, res) => {
