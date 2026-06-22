@@ -162,6 +162,80 @@ app.post('/watchlist', (req,res)=>{
   res.json({success:true});
 });
 
+// Enrich metadata from AniList (server-side)
+async function fetchAniList(id){
+  if(!id) return null;
+  try{
+    const query = `query ($id: Int) { Media(id: $id, type: ANIME) { id title { romaji english native } description coverImage { large medium } bannerImage siteUrl episodes season seasonYear genres tags { name } trailer { id site } } }`;
+    const resp = await fetch('https://graphql.anilist.co', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables: { id: Number(id) } })
+    });
+    if(!resp.ok) return null;
+    const j = await resp.json();
+    return j.data && j.data.Media ? j.data.Media : null;
+  }catch(e){
+    console.error('AniList fetch error', e);
+    return null;
+  }
+}
+
+// Enrich all series with anilistId
+app.post('/enrich', async (req, res) => {
+  const data = readData();
+  for(const s of data){
+    if(s.anilistId){
+      const meta = await fetchAniList(s.anilistId);
+      if(meta){
+        s.description = s.description && s.description.length>10 ? s.description : (meta.description || s.description || '');
+        s.thumbnail = meta.coverImage && (meta.coverImage.large || meta.coverImage.medium) ? (meta.coverImage.large || meta.coverImage.medium) : s.thumbnail;
+        s.bannerImage = meta.bannerImage || s.bannerImage || null;
+        if(meta.trailer && meta.trailer.site === 'youtube' && meta.trailer.id){
+          s.trailer = `https://www.youtube.com/watch?v=${meta.trailer.id}`;
+        } else if(meta.trailer && meta.trailer.site){
+          s.trailer = null;
+        }
+        s.genres = meta.genres || s.genres || [];
+        s.season = meta.season || s.season || null;
+        s.seasonYear = meta.seasonYear || s.seasonYear || null;
+        s.episodesCount = meta.episodes || s.episodesCount || (s.episodes ? s.episodes.length : 0);
+      }
+      // small delay to avoid rate limits
+      await new Promise(r=>setTimeout(r, 300));
+    }
+  }
+  writeData(data);
+  notifyAll(data);
+  res.json({ success: true, updated: data.length });
+});
+
+// Enrich single series
+app.post('/enrich/:id', async (req, res) => {
+  const sid = req.params.id;
+  const data = readData();
+  const series = data.find(s=>s.id===sid);
+  if(!series) return res.status(404).json({ success:false, error:'series not found' });
+  if(!series.anilistId) return res.status(400).json({ success:false, error:'no anilistId' });
+  const meta = await fetchAniList(series.anilistId);
+  if(meta){
+    series.description = series.description && series.description.length>10 ? series.description : (meta.description || series.description || '');
+    series.thumbnail = meta.coverImage && (meta.coverImage.large || meta.coverImage.medium) ? (meta.coverImage.large || meta.coverImage.medium) : series.thumbnail;
+    series.bannerImage = meta.bannerImage || series.bannerImage || null;
+    if(meta.trailer && meta.trailer.site === 'youtube' && meta.trailer.id){
+      series.trailer = `https://www.youtube.com/watch?v=${meta.trailer.id}`;
+    }
+    series.genres = meta.genres || series.genres || [];
+    series.season = meta.season || series.season || null;
+    series.seasonYear = meta.seasonYear || series.seasonYear || null;
+    series.episodesCount = meta.episodes || series.episodesCount || (series.episodes ? series.episodes.length : 0);
+    writeData(data);
+    notifyAll(data);
+    return res.json({ success:true, series });
+  }
+  res.status(500).json({ success:false, error:'failed to fetch metadata' });
+});
+
 // Server-Sent Events endpoint for live updates
 app.get('/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
