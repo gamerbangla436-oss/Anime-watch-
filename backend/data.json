@@ -88,5 +88,33 @@
     "episodes": [
       { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
     ]
+  },
+  {
+    "id": "classroom-of-the-elite-season-2",
+    "title": "Classroom of the Elite Season 2",
+    "description": "Sequel to Classroom of the Elite. (Imported from user export)",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Classroom+of+the+Elite+S2",
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ]
+  },
+  {
+    "id": "mushoku-tensei-season-2",
+    "title": "Mushoku Tensei: Jobless Reincarnation Season 2",
+    "description": "Sequel to Mushoku Tensei. (Imported from user export)",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Mushoku+Tensei+S2",
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ]
+  },
+  {
+    "id": "isekai-de-cheat-skill",
+    "title": "Isekai de Cheat Skill wo Te ni Shita Ore wa, Genjitsu Sekai wo mo Musou Suru: Level Up wa Jinsei wo Kaeta",
+    "description": "Imported from user export.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Isekai+Cheat+Skill",
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ]
+  },
+  {
+    "id": "there-was-a-cute-girl-in-the-heros-party",
+    "title": "There was a Cute Girl in the Hero’s Party, so I Tried Confessing to Her",
+    "description": "Imported from user export.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Cute+Girl+Hero+Party",
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ]
   }
 ]
