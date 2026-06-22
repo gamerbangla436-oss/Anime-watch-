@@ -6,115 +6,133 @@
     "thumbnail": "https://via.placeholder.com/320x180?text=Jujutsu+Kaisen",
     "episodes": [
       { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "immortal-king",
     "title": "Immortal King",
     "description": "Fantasy/adventure about an immortal ruler (placeholder entry).",
     "thumbnail": "https://via.placeholder.com/320x180?text=Immortal+King",
-    "episodes": [
-      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "demon-slayer",
     "title": "Demon Slayer",
     "description": "Tanjiro fights demons to protect his sister and avenge his family.",
     "thumbnail": "https://via.placeholder.com/320x180?text=Demon+Slayer",
-    "episodes": [
-      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "attack-on-titan",
     "title": "Attack on Titan",
     "description": "Humanity battles gigantic Titans in a dystopian world.",
     "thumbnail": "https://via.placeholder.com/320x180?text=Attack+on+Titan",
-    "episodes": [
-      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "one-piece",
     "title": "One Piece",
     "description": "Monkey D. Luffy searches for the ultimate treasure to become Pirate King.",
     "thumbnail": "https://via.placeholder.com/320x180?text=One+Piece",
-    "episodes": [
-      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "naruto",
     "title": "Naruto",
     "description": "A young ninja strives to become the leader of his village.",
     "thumbnail": "https://via.placeholder.com/320x180?text=Naruto",
-    "episodes": [
-      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "my-hero-academia",
     "title": "My Hero Academia",
     "description": "In a world of heroes, Izuku Midoriya enrolls in a hero academy to learn how to be a pro hero.",
     "thumbnail": "https://via.placeholder.com/320x180?text=My+Hero+Academia",
-    "episodes": [
-      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "fullmetal-alchemist-brotherhood",
     "title": "Fullmetal Alchemist: Brotherhood",
     "description": "Two brothers search for the Philosopher's Stone to restore their bodies.",
     "thumbnail": "https://via.placeholder.com/320x180?text=FMA+Brotherhood",
-    "episodes": [
-      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "bleach",
     "title": "Bleach",
     "description": "Ichigo becomes a Soul Reaper and defends the living from evil spirits.",
     "thumbnail": "https://via.placeholder.com/320x180?text=Bleach",
-    "episodes": [
-      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "chainsaw-man",
     "title": "Chainsaw Man",
     "description": "Denji merges with his pet devil and becomes Chainsaw Man to hunt devils.",
     "thumbnail": "https://via.placeholder.com/320x180?text=Chainsaw+Man",
-    "episodes": [
-      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
-    ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": null,
+    "progress": 0
   },
   {
     "id": "classroom-of-the-elite-season-2",
     "title": "Classroom of the Elite Season 2",
-    "description": "Sequel to Classroom of the Elite. (Imported from user export)",
+    "anilistId": 145545,
+    "malId": 51096,
+    "description": "Sequel to Classroom of the Elite.",
     "thumbnail": "https://via.placeholder.com/320x180?text=Classroom+of+the+Elite+S2",
-    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": "PLAN_TO_WATCH",
+    "progress": 0
   },
   {
     "id": "mushoku-tensei-season-2",
     "title": "Mushoku Tensei: Jobless Reincarnation Season 2",
-    "description": "Sequel to Mushoku Tensei. (Imported from user export)",
+    "anilistId": 146065,
+    "malId": 51179,
+    "description": "Sequel to Mushoku Tensei.",
     "thumbnail": "https://via.placeholder.com/320x180?text=Mushoku+Tensei+S2",
-    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": "PLAN_TO_WATCH",
+    "progress": 0
   },
   {
     "id": "isekai-de-cheat-skill",
     "title": "Isekai de Cheat Skill wo Te ni Shita Ore wa, Genjitsu Sekai wo mo Musou Suru: Level Up wa Jinsei wo Kaeta",
+    "anilistId": 170110,
+    "malId": 56906,
     "description": "Imported from user export.",
     "thumbnail": "https://via.placeholder.com/320x180?text=Isekai+Cheat+Skill",
-    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": "PLAN_TO_WATCH",
+    "progress": 0
   },
   {
     "id": "there-was-a-cute-girl-in-the-heros-party",
     "title": "There was a Cute Girl in the Hero’s Party, so I Tried Confessing to Her",
+    "anilistId": 195515,
+    "malId": 61983,
     "description": "Imported from user export.",
     "thumbnail": "https://via.placeholder.com/320x180?text=Cute+Girl+Hero+Party",
-    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ]
+    "episodes": [ { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" } ],
+    "status": "WATCHING",
+    "progress": 0
   }
 ]
