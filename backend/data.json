@@ -1,6 +1,12 @@
 [
-  {
-    "title": "Sample Anime",
-    "video": "https://www.w3schools.com/html/mov_bbb.mp4"
-  }
+  { "title": "Jujutsu Kaisen", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
+  { "title": "Immortal King", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
+  { "title": "Demon Slayer", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
+  { "title": "Attack on Titan", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
+  { "title": "One Piece", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
+  { "title": "Naruto", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
+  { "title": "My Hero Academia", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
+  { "title": "Fullmetal Alchemist: Brotherhood", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
+  { "title": "Bleach", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
+  { "title": "Chainsaw Man", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
 ]
