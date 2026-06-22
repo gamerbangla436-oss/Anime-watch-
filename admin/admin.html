@@ -1,26 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Upload</title>
+  <title>Admin Upload</title>
 </head>
 <body>
-<h1>Upload Anime</h1>
+  <h1>Upload Anime</h1>
 
-<input id="title" placeholder="Title"><br>
-<input id="video" placeholder="Video URL"><br>
-<button onclick="upload()">Upload</button>
+  <input id="title" placeholder="Title"><br>
+  <input id="video" placeholder="Video URL"><br>
+  <button id="uploadBtn">Upload</button>
 
-<script>
-function upload() {
-  fetch("http://localhost:3000/anime", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: document.getElementById("title").value,
-      video: document.getElementById("video").value
-    })
-  }).then(()=>alert("Uploaded"));
-}
-</script>
+  <script>
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, function(m){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+      });
+    }
+
+    document.getElementById('uploadBtn').addEventListener('click', upload);
+
+    function upload() {
+      const title = document.getElementById('title').value.trim();
+      const video = document.getElementById('video').value.trim();
+      if (!title) return alert('Please provide a title.');
+
+      fetch('/anime', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, video })
+      })
+      .then(res => {
+        if (!res.ok) return res.json().then(j => { throw new Error(j.error || 'Upload failed'); });
+        return res.json();
+      })
+      .then(() => {
+        alert('Uploaded');
+        // Clear inputs
+        document.getElementById('title').value = '';
+        document.getElementById('video').value = '';
+      })
+      .catch(err => {
+        alert('Upload failed: ' + escapeHtml(err.message));
+        console.error(err);
+      });
+    }
+  </script>
 </body>
 </html>
