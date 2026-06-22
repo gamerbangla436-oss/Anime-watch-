@@ -1,12 +1,92 @@
 [
-  { "title": "Jujutsu Kaisen", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { "title": "Immortal King", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { "title": "Demon Slayer", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { "title": "Attack on Titan", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { "title": "One Piece", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { "title": "Naruto", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { "title": "My Hero Academia", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { "title": "Fullmetal Alchemist: Brotherhood", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { "title": "Bleach", "video": "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { "title": "Chainsaw Man", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+  {
+    "id": "jujutsu-kaisen",
+    "title": "Jujutsu Kaisen",
+    "description": "Supernatural action following Yuji Itadori as he joins a secret organization of jujutsu sorcerers.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Jujutsu+Kaisen",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  },
+  {
+    "id": "immortal-king",
+    "title": "Immortal King",
+    "description": "Fantasy/adventure about an immortal ruler (placeholder entry).",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Immortal+King",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  },
+  {
+    "id": "demon-slayer",
+    "title": "Demon Slayer",
+    "description": "Tanjiro fights demons to protect his sister and avenge his family.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Demon+Slayer",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  },
+  {
+    "id": "attack-on-titan",
+    "title": "Attack on Titan",
+    "description": "Humanity battles gigantic Titans in a dystopian world.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Attack+on+Titan",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  },
+  {
+    "id": "one-piece",
+    "title": "One Piece",
+    "description": "Monkey D. Luffy searches for the ultimate treasure to become Pirate King.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=One+Piece",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  },
+  {
+    "id": "naruto",
+    "title": "Naruto",
+    "description": "A young ninja strives to become the leader of his village.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Naruto",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  },
+  {
+    "id": "my-hero-academia",
+    "title": "My Hero Academia",
+    "description": "In a world of heroes, Izuku Midoriya enrolls in a hero academy to learn how to be a pro hero.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=My+Hero+Academia",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  },
+  {
+    "id": "fullmetal-alchemist-brotherhood",
+    "title": "Fullmetal Alchemist: Brotherhood",
+    "description": "Two brothers search for the Philosopher's Stone to restore their bodies.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=FMA+Brotherhood",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  },
+  {
+    "id": "bleach",
+    "title": "Bleach",
+    "description": "Ichigo becomes a Soul Reaper and defends the living from evil spirits.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Bleach",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  },
+  {
+    "id": "chainsaw-man",
+    "title": "Chainsaw Man",
+    "description": "Denji merges with his pet devil and becomes Chainsaw Man to hunt devils.",
+    "thumbnail": "https://via.placeholder.com/320x180?text=Chainsaw+Man",
+    "episodes": [
+      { "id": "s1e1", "title": "Episode 1", "video": "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  }
 ]
