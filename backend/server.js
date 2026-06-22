@@ -75,7 +75,8 @@ app.post('/anime', (req, res) => {
     title: body.title,
     description: body.description || '',
     thumbnail: body.thumbnail || `https://via.placeholder.com/320x180?text=${encodeURIComponent(body.title)}`,
-    episodes: [ { id: 's1', title: body.title, video: body.video || '' } ],
+    episodes: [ { id: 's1', title: body.title, video: body.video || '', language: body.language || null } ],
+    languages: Array.isArray(body.languages) ? body.languages : (body.language ? [body.language] : []),
     status: body.status || null,
     progress: body.progress || 0
   };
@@ -103,6 +104,7 @@ app.post('/series', (req, res) => {
     anilistId: body.anilistId || null,
     malId: body.malId || null,
     featured: !!body.featured,
+    languages: Array.isArray(body.languages) ? body.languages : [],
     status: body.status || null,
     progress: body.progress || 0
   };
@@ -125,7 +127,7 @@ app.post('/series/:id/episodes', (req, res) => {
 
   // create episode id
   const eid = `e${(series.episodes.length + 1)}`;
-  const episode = { id: eid, title: body.title, video: body.video };
+  const episode = { id: eid, title: body.title, video: body.video, language: body.language || null };
   series.episodes.push(episode);
   writeData(data);
   notifyAll(data);
@@ -141,7 +143,7 @@ app.patch('/series/:id', (req, res) => {
   if (!series) return res.status(404).json({ success: false, error: 'series not found' });
 
   // update allowed fields
-  const allowed = ['title','description','thumbnail','anilistId','malId','featured','status','progress'];
+  const allowed = ['title','description','thumbnail','anilistId','malId','featured','languages','status','progress'];
   allowed.forEach(k => {
     if (Object.prototype.hasOwnProperty.call(body, k)) series[k] = body[k];
   });
